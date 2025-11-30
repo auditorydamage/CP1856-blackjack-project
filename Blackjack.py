@@ -27,6 +27,9 @@ def initialState():
 
 def shuffleDeck(cards):
     # Builds a shuffled deck from the cards list, returns it
+    # The actual "deck" built here is a list of integers, 0 through 51, 
+    # which act as references to entries in the master cards list. These values
+    # are randomly popped into deck from an ordered list, deck_prep
     deck = []
     deck_prep = [x for x in range(len(cards))]
     for x in range(len(cards)):
@@ -44,6 +47,19 @@ def makeBet():
     return
 
 
+def playerDisplay(cards, hands, player):
+    print(f"YOUR CARDS:")
+    for card in hands[player]:
+        print(f"{cards[card][1]} of {cards[card][0]}")
+
+
+def scoreCheck(cards, hands, player):
+    score = 0
+    for card in hands[player]:
+        score += cards[card][2]
+    print(score)
+
+
 def main():
 
     cards, deck = initialState()
@@ -52,19 +68,43 @@ def main():
     gameBanner()
     
     # Beginning of hand - initial deal
+    # overall game loop will start here
+
+    # Make initial bet
+    # makeBet()
+
+    # then deal hands
     while len(hands[0]) < 2:
         for player in range(len(hands)):
             dealCard(deck, hands, player)
 
     print(f"DEALER'S SHOW CARD:")
-    print(f"{cards[hands[0][1]][1]} of {cards[hands[0][0]][0]}")
+    print(f"{cards[hands[0][0]][1]} of {cards[hands[0][0]][0]}")
     print()
+
+    # DEBUG: making sure the cards are being properly referenced
+    print("DEBUG:")
+    print("Dealer cards:")
+    print("-contents of hands[0]-")
+    print(hands[0])
+    print("-referenced entries in cards-")
+    print(cards[hands[0][0]], cards[hands[0][1]])
+    print()
+    print("Player cards:")
+    print("-contents of hands[1]-")
+    print(hands[1])
+    print("-referenced entries in cards-")
+    print(cards[hands[1][0]], cards[hands[1][1]])
     
-    print(f"YOUR CARDS:")
-    for card in hands[1]:
-        print(f"{cards[card][1]} of {cards[card][0]}")
-    
-    
+    # player loop will start here
+
+    playerDisplay(cards, hands, 1)
+
+    while input("Hit or stand? (hit/stand): ") == "hit":
+           dealCard(deck, hands, 1)
+           scoreCheck(cards, hands, 1)
+           playerDisplay(cards, hands, 1)
+           
     
     # while True:
     #     # main game loop
@@ -82,6 +122,9 @@ def main():
     #.    # win/loss?
     #.    # show money won/lost, record to disk
     #.    # play another hand?
+
+    # temporary game end
+    print("Game over man, game over!")
 
 
 if __name__ == '__main__':
