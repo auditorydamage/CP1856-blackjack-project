@@ -15,7 +15,8 @@ def initialState():
     suits = ["Hearts", "Diamonds", "Spades", "Clubs"]
     ranks = ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", \
              "Queen", "King"]
-    points = [[1, 11], 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+    # re-add a mini-list in [0] for the Ace score options
+    points = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
     for suit in suits:
         pointCounter = 0
         for rank in ranks:
@@ -47,84 +48,101 @@ def makeBet():
     return
 
 
-def playerDisplay(cards, hands, player):
-    print(f"YOUR CARDS:")
+def handDisplay(cards, hands, player):
+    if player == 0:
+        print("DEALER'S CARDS:")
+    else:
+        print("YOUR CARDS:")
     for card in hands[player]:
         print(f"{cards[card][1]} of {cards[card][0]}")
+    print()
 
 
 def scoreCheck(cards, hands, player):
     score = 0
     for card in hands[player]:
+        # add logic here for the Ace point options
         score += cards[card][2]
-    print(score)
+    return score
 
 
 def main():
 
     cards, deck = initialState()
-    hands = [ [], [] ] # 0 is dealer, 1 is player
-
     gameBanner()
     
     # Beginning of hand - initial deal
-    # overall game loop will start here
-
-    # Make initial bet
-    # makeBet()
-
-    # then deal hands
-    while len(hands[0]) < 2:
-        for player in range(len(hands)):
-            dealCard(deck, hands, player)
-
-    print(f"DEALER'S SHOW CARD:")
-    print(f"{cards[hands[0][0]][1]} of {cards[hands[0][0]][0]}")
-    print()
-
-    # DEBUG: making sure the cards are being properly referenced
-    print("DEBUG:")
-    print("Dealer cards:")
-    print("-contents of hands[0]-")
-    print(hands[0])
-    print("-referenced entries in cards-")
-    print(cards[hands[0][0]], cards[hands[0][1]])
-    print()
-    print("Player cards:")
-    print("-contents of hands[1]-")
-    print(hands[1])
-    print("-referenced entries in cards-")
-    print(cards[hands[1][0]], cards[hands[1][1]])
     
-    # player loop will start here
+    while True:
 
-    playerDisplay(cards, hands, 1)
+        # Track number of hands dealt; if hands reaches 15, or the deck
+        # drop below 10 cards remaining, reshuffle
+        # Make initial bet
+        # makeBet()
 
-    while input("Hit or stand? (hit/stand): ") == "hit":
+        # then deal hands. 0 is dealer, 1 is player
+        hands = [ [], [] ]
+        while len(hands[0]) < 2:
+            for player in range(len(hands)):
+                dealCard(deck, hands, player)
+
+        print(f"DEALER'S SHOW CARD:")
+        print(f"{cards[hands[0][0]][1]} of {cards[hands[0][0]][0]}")
+        print()
+
+        # DEBUG: making sure the cards are being properly referenced
+        # print("DEBUG:")
+        # print("Dealer cards:")
+        # print("-contents of hands[0]-")
+        # print(hands[0])
+        # print("-referenced entries in cards-")
+        # print(cards[hands[0][0]], cards[hands[0][1]])
+        # print()
+        # print("Player cards:")
+        # print("-contents of hands[1]-")
+        # print(hands[1])
+        # print("-referenced entries in cards-")
+        # print(cards[hands[1][0]], cards[hands[1][1]])
+
+        handDisplay(cards, hands, 1)
+
+        while input("Hit or stand? (hit/stand): ") == "hit":
            dealCard(deck, hands, 1)
-           scoreCheck(cards, hands, 1)
-           playerDisplay(cards, hands, 1)
-           
-    
-    # while True:
-    #     # main game loop
-    #     # make bet
-    #     # deal cards to start hand
-    #.    # display dealer's show card
-    #     while True:
-    #         # player's loop
-    #         # display player's cards
-    #         # hit or stand?
-    #         # hit: deal another card, check score for bust
-    #         # stand: end player's loop
-    #     # show dealer's cards
-    #.    # tally and show points
-    #.    # win/loss?
-    #.    # show money won/lost, record to disk
-    #.    # play another hand?
+           handDisplay(cards, hands, 1)
+           if scoreCheck(cards, hands, 1) > 21:
+               break
+           print()
 
-    # temporary game end
-    print("Game over man, game over!")
+        # Once player's turn is done, run the dealer's play, then show
+        # the outcome. TODO: implement dealer's play.
+        handDisplay(cards, hands, 0)
+
+        playerScore = scoreCheck(cards, hands, 1)
+        dealerScore = scoreCheck(cards, hands, 0)
+        print(f"YOUR POINTS:     {playerScore}\n"
+              f"DEALER'S POINTS: {dealerScore}\n")
+
+        # Add money handling, move this into its own functilon
+        if playerScore > 21:
+            print("Bust! You lose.") 
+        elif playerScore > dealerScore:
+            print("Congratulations. You win!")
+        elif playerScore < dealerScore and dealerScore > 21:
+            print("Dealer busted. You win!")
+        elif playerScore < dealerScore:
+            print("Sorry, You lose.")
+        else:
+            print("Draw!")
+        print()
+
+        # DEBUG: show remaining size of deck
+        print(f"Deck cards remaining: {len(deck)}")
+
+        if input("Play again? (y/n): ") == 'n':
+            print()
+            print("Come back soon!")
+            print("Bye!")
+            break
 
 
 if __name__ == '__main__':
