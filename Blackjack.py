@@ -45,9 +45,13 @@ def dealCard(deck, hands, player):
     hands[player].append(deck.pop(0))
 
 
-def makeBet():
+def makeBet(money):
     # Get a bet from the player, make sure it's a valid amount
-    return
+    print(f"Money: {money}")
+    while (bet := int(input("Bet amount: "))) > money:
+        print(f"You don't have enough money to make that bet.\n"
+              f"Enter a bet up to ${money}.")
+    return bet
 
 
 def handDisplay(cards, hands, player):
@@ -81,6 +85,19 @@ def scoreCheck(cards, hands, player):
     return score
 
 
+def playHand(cards, deck, hands, player):
+    # the hand playing logic; if dealer, hit until score >= 17
+    if player == 0:
+        while scoreCheck(cards, hands, player) < 17:
+            dealCard(deck, hands, player)
+    else:
+        while input("Hit or stand? (hit/stand): ") == "hit":
+            dealCard(deck, hands, player)
+            handDisplay(cards, hands, player)
+            if scoreCheck(cards, hands, player) > 21:
+                break
+            print()
+
 # def handResult(playerScore, dealerScore, bet):
     # show results, pay out winnings, update wallet
 #    return
@@ -98,42 +115,38 @@ def main():
         # Track number of hands dealt; if hands reaches 15, or the deck
         # drops below 10 cards remaining, reshuffle
         # Make initial bet
-        # bet = makeBet()
+        bet = makeBet(money)
 
         # then deal hands. 0 is dealer, 1 is player
         hands = [ [], [] ]
         while len(hands[0]) < 2:
             for player in range(len(hands)):
-                dealCard(deck, hands, player)
-
-        # The only time cards are displayed without calling handDisplay()
-        print(f"DEALER'S SHOW CARD:")
-        print(f"{cards[hands[0][0]][1]} of {cards[hands[0][0]][0]}")
-        print()
+                dealCard(deck, hands, player) 
         
-        handDisplay(cards, hands, 1)
         # if player has blackjack, don't even bother with the rest
         # of the player loop and aftermath; declare blackjack, pay out
         # 3:2, go directly to ask player whether to play another hand
-        # Catch the rare case of both player and dealer having blackjack
         if scoreCheck(cards, hands, 1) == 21 and scoreCheck(cards, hands, 0) < 21:
+            handDisplay(cards, hands, 1)
             print("Blackjack! You win!")
+        # Catch the rare case of double blackjacks (I actually got this in testing!)
         elif scoreCheck(cards, hands, 1) == 21 and scoreCheck(cards, hands, 0) == 21:
+            handDisplay(cards, hands, 1)
             handDisplay(cards, hands, 0)
             print("Draw! Double blackjacks!")
-        else:    
-            while input("Hit or stand? (hit/stand): ") == "hit":
-                # If hit, deal the next card, show the player's hand, 
-                # then check to make sure the player didn't bust; if so,
-                # player's hand is done
-                dealCard(deck, hands, 1)
-                handDisplay(cards, hands, 1)
-                if scoreCheck(cards, hands, 1) > 21:
-                    break
-                print()
-
-            # Once player stands, run the dealer's play, then show
-            # the outcome. TODO: implement dealer's play.
+        # No blackjack? Play on.
+        else:
+            # The only time cards are displayed without calling handDisplay()
+            print(f"DEALER'S SHOW CARD:")
+            print(f"{cards[hands[0][0]][1]} of {cards[hands[0][0]][0]}")
+            print()
+            handDisplay(cards, hands, 1)
+            # Player's hand
+            playHand(cards, deck, hands, 1)
+            # Dealer's hand; only play if the player doesn't bust
+            if scoreCheck(cards, hands, 1) <= 21:
+                playHand(cards, deck, hands, 0)
+            
             handDisplay(cards, hands, 0)
 
             playerScore = scoreCheck(cards, hands, 1)
@@ -141,7 +154,8 @@ def main():
             print(f"YOUR POINTS:     {playerScore}\n"
                   f"DEALER'S POINTS: {dealerScore}\n")
 
-            # Add money handling, maybe move this into its own functilon
+            # Add money handling, maybe move this into its own function
+            # handResult(playerScore, dealerScore, bet)
             if playerScore > 21:
                 print("Bust! You lose.") 
             elif playerScore > dealerScore:
