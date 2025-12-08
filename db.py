@@ -10,11 +10,11 @@ def getMoney():
     except FileNotFoundError:
         print("Wallet not found - creating new wallet with $100.")
         money = 100.0
-        db.putMoney(money)
+        putMoney(money)
     except ValueError:
         print("Invalid value from wallet - starting with $100.00.")
         money = 100.0
-        db.putMoney(money)
+        putMoney(money)
     return money
 
 
