@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
 def getMoney():
-    # Read the player's available money, or create one if none exists
+    # Read the player's wallet, or create one if none exists
+    # Also catch the case of the wallet file containing a non-numeric
+    # value and create a new wallet with $100.
     try:
         with open("wallet", "r") as walletfile:
-            money = int(walletfile.read())
+            money = float(walletfile.read())
     except FileNotFoundError:
-        money = 100
         print("Wallet not found - creating new wallet with $100.")
-        with open("wallet", "w") as walletfile:
-            walletfile.write(str(money))
+        money = 100.0
+        db.putMoney(money)
     except ValueError:
         print("Invalid value from wallet - starting with $100.00.")
-        money = 100
+        money = 100.0
+        db.putMoney(money)
     return money
 
 
@@ -20,4 +22,3 @@ def putMoney(amount):
     # Update the player's wallet
     with open("wallet", "w") as walletfile:
         walletfile.write(str(amount))
-    return
